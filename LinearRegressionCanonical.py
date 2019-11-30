@@ -1,6 +1,5 @@
 #CanonicalEquation solution was used for linear regression becasue 
 # number of attributes was small
-#
 
 import numpy as np
 import pandas as pd
@@ -8,6 +7,7 @@ import seaborn as sns
 from sklearn import linear_model
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
+from sklearn.metrics import mean_absolute_error
 
 WineScore = []
 weight = []
@@ -72,8 +72,6 @@ def main():
 
 	whiteScores = classify(whites)
 	redScores = classify(reds)
-
-	print(whites)
 	
 	whites = (whites.drop(['quality'], axis = 1))
 	reds = (reds.drop(['quality'], axis = 1))
@@ -81,18 +79,16 @@ def main():
 	whitePreds = predict(whites,canonicalCalculation(whites,whiteScores))
 	redPreds = predict(reds,canonicalCalculation(reds,redScores))
 
-	whitesActaulandPredicted = pd.DataFrame({'actual':whiteScores,'predicted':whitePreds})
-	regplot(whitesActaulandPredicted,"hello")
-
 	redsAccuracy =accuracy(redPreds,redScores)
 	whitesAccuracy = accuracy(whitePreds,whiteScores)
 
-	print("canonical solution")
-	print('whites: {0}'.format(whitesAccuracy))
-	print('reds: {0}'.format(redsAccuracy))
-
-	
-	
+	print("Mean Absolute Error")
+	print("Whites: %1.2f"%mean_absolute_error(whiteScores, whitePreds))
+	print("Reds: %1.2f"%mean_absolute_error(redScores, redPreds))
+	print("")
+	print("Accuracy:")
+	print("Whites: %2d%%"%(whitesAccuracy*100))
+	print("Reds: %2d%%"%(redsAccuracy*100))
 
 if __name__ == '__main__':
 	main()
