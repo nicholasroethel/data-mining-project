@@ -31,30 +31,44 @@ def accuracy(actual,pred):
 def weights(data):
 	return np.ones(1,data.shape[1])
 
-def visualizePairPlot(data):
+def pairgrid_heatmap(x,y,**kws):
+	cmap = sns.light_palette(kws.pop("color"), as_cmap=True)
+	plt.hist2d(x, y, cmap=cmap, cmin=1, **kws)
+
+def visualizePairPlot(data,__name__):
 	sns.pairplot(data,hue="quality")
 	#this plots a figure per script automatically
 	from os.path import realpath, basename 
-	s = basename(realpath(__file__))
 	fig = plt.gcf()
-	fig.savefig(s.split('.')[0])
-	plt.show()
+	fig.savefig(__name__)
+	plt.close()
 
-def visualizePairGrid(data):
+def visualizePairGrid(data,__name__):
 	g = sns.PairGrid(data)
 	g.map_diag(plt.hist,bins=20)
+	g.map_offdiag(pairgrid_heatmap,bins=20,norm=LogNorm())
 	from os.path import realpath, basename 
-	s = basename(realpath(__file__))
 	fig = plt.gcf()
-	fig.savefig(s.split('.')[0])
-	plt.show()
+	fig.savefig(__name__)
+	plt.close()
+
+def regplot(data,__name__):
+	sns.scatterplot(x="predicted",y="actual",data = data)
+	from os.path import realpath, basename 
+	fig = plt.gcf()
+	fig.savefig(__name__)
+	plt.close()
 
 
 def main():
 	whites = (pd.read_csv('winequality-white-reduced.csv', delimiter = ",", usecols = [1,2,3,4]))
-	reds = (pd.read_csv('winequality-red-reduced.csv', usecols = [1,2,3,4]))
+	reds = (pd.read_csv('winequality-red-reduced.csv', delimiter = ',' ,usecols = [1,2,3,4]))
 
-	visualizePairGrid(whites)
+	visualizePairPlot(whites,"whitePairPlot")
+	visualizePairPlot(reds,"redsPairPlot")
+
+	visualizePairGrid(whites,"whiteGridPlot")
+	visualizePairGrid(reds,"redsGridPlot")
 
 	whiteScores = classify(whites)
 	redScores = classify(reds)
@@ -67,7 +81,8 @@ def main():
 	whitePreds = predict(whites,canonicalCalculation(whites,whiteScores))
 	redPreds = predict(reds,canonicalCalculation(reds,redScores))
 
-
+	whitesActaulandPredicted = pd.DataFrame({'actual':whiteScores,'predicted':whitePreds})
+	regplot(whitesActaulandPredicted,"hello")
 
 	redsAccuracy =accuracy(redPreds,redScores)
 	whitesAccuracy = accuracy(whitePreds,whiteScores)
