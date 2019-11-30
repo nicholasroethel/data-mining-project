@@ -1,4 +1,4 @@
-,volatile acidity,residual sugar,density,quality
+number,volatile acidity,residual sugar,density,quality
 0,0.27,20.7,1.001,6
 1,0.3,1.6,0.9940000000000001,6
 2,0.28,6.9,0.9951,6

@@ -60,6 +60,7 @@ class DecisionTreeClassifier:
                     best_gini = gini
                     best_idx = idx
                     best_thr = (thresholds[i] + thresholds[i - 1]) / 2
+
         return best_idx, best_thr
 
     def _grow_tree(self, X, y, depth=0):
@@ -94,15 +95,19 @@ if __name__ == "__main__":
 
     dataset = pd.read_csv(sys.argv[1])
 
+    # = pd.read_csv('winequality-white-reduced.csv')
+    #dataset = pd.read_csv(sys.argv[1])
+
     X = dataset.drop('quality', axis=1)
     y = dataset.quality  # pylint: disable=no-member
-    
+
     X_train,X_test,y_train,y_test = train_test_split(X,y,test_size = 0.2)
 
     train_data = X_train.to_numpy()
     train_data = np.delete(train_data,0,1)
+
     train_target = y_train.to_numpy()
-    clf = DecisionTreeClassifier(max_depth=1)
+    clf = DecisionTreeClassifier(max_depth=15)
     clf.fit(train_data, train_target)    
 
     test_data = X_test.to_numpy()
@@ -119,6 +124,14 @@ if __name__ == "__main__":
     test_result = np.asarray(temp)
     from sklearn.metrics import accuracy_score
     accuracy = accuracy_score(test_target, test_result)
+
+    max_depths = np.linspace(1,40,40,endpoint=True)
+    line1 = plt.plot(max_depths,test_target,'b',lable="test_target")
+    line2 = plt.plot(max_depths,test_result,'r',lable="test_result")
+    # plt.ylabel(‘AUC score’)
+    # plt.xlabel(‘Tree depth’)
+    plt.show()
+
     
     print("\nTest data targets:\n")
     print(test_target)
