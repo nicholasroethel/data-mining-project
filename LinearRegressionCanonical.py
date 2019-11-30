@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn import linear_model
+import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 
 WineScore = []
 weight = []
@@ -29,22 +31,42 @@ def accuracy(actual,pred):
 def weights(data):
 	return np.ones(1,data.shape[1])
 
-def normailzeData(data):
-	z = (data - np.min(data))/(np.max(data)-np.min(data))
+def visualizePairPlot(data):
+	sns.pairplot(data,hue="quality")
+	#this plots a figure per script automatically
+	from os.path import realpath, basename 
+	s = basename(realpath(__file__))
+	fig = plt.gcf()
+	fig.savefig(s.split('.')[0])
+	plt.show()
+
+def visualizePairGrid(data):
+	g = sns.PairGrid(data)
+	g.map_diag(plt.hist,bins=20)
+	from os.path import realpath, basename 
+	s = basename(realpath(__file__))
+	fig = plt.gcf()
+	fig.savefig(s.split('.')[0])
+	plt.show()
 
 
 def main():
 	whites = (pd.read_csv('winequality-white-reduced.csv', delimiter = ",", usecols = [1,2,3,4]))
 	reds = (pd.read_csv('winequality-red-reduced.csv', usecols = [1,2,3,4]))
 
+	visualizePairGrid(whites)
+
 	whiteScores = classify(whites)
 	redScores = classify(reds)
 
+	print(whites)
+	
 	whites = (whites.drop(['quality'], axis = 1))
 	reds = (reds.drop(['quality'], axis = 1))
 
 	whitePreds = predict(whites,canonicalCalculation(whites,whiteScores))
 	redPreds = predict(reds,canonicalCalculation(reds,redScores))
+
 
 
 	redsAccuracy =accuracy(redPreds,redScores)
@@ -54,19 +76,8 @@ def main():
 	print('whites: {0}'.format(whitesAccuracy))
 	print('reds: {0}'.format(redsAccuracy))
 
-	print('SKLEARN solution')
-	clf = linear_model.SGDRegressor(max_iter=1000,tol=0.001)
-	reg1 = clf.fit(reds,redScores)
-	reg2 = clf.fit(whites,whiteScores)
-
-	print("whites: {0}".format(reg2.score(whites,whiteScores)))
-	print("reds:{0}".format(reg1.score(reds,redScores))) # THIS PRODUCES A WACK NUMBER FOR SOMEREASON
-
-
 	
-
-
-
+	
 
 if __name__ == '__main__':
 	main()
