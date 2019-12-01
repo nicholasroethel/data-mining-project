@@ -90,7 +90,6 @@ class DecisionTreeClassifier:
                 node = node.right
         return node.predicted_class
 
-
 if __name__ == "__main__":
     
     import sys
