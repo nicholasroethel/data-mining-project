@@ -2,10 +2,14 @@
 #Adopted and modified based on Towards Data Science decision tree tutorial by Joachin Valente
 #https://towardsdatascience.com/decision-tree-from-scratch-in-python-46e99dfea775
 
+import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import mean_absolute_error
+from sklearn.model_selection import train_test_split
+from matplotlib.legend_handler import HandlerLine2D
 
 class Node:
     def __init__(self, predicted_class):
@@ -90,15 +94,22 @@ class DecisionTreeClassifier:
                 node = node.right
         return node.predicted_class
 
+def visualizeDifference(Scores,Preds):
+
+    #visualizing
+    fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
+    axs[0].hist(Scores)
+    axs[0].set_title('Actual Scores')
+    axs[1].hist(Preds)
+    axs[1].set_title('Predicted Scores\nwith Regression')
+    for ax in axs.flat:
+        ax.set(xlabel='Quality', ylabel='Frequency')
+    fig = plt.gcf()
+    fig.savefig('ComparisonRT.png')
+
+       
 if __name__ == "__main__":
     
-    import sys
-    from sklearn.model_selection import train_test_split
-    from sklearn.metrics import accuracy_score
-    import matplotlib.pyplot as plt
-    from matplotlib.legend_handler import HandlerLine2D
-
-
     #Consists total of 15 depths, from number range 1 to 30
     max_depths = np.linspace(1,30,15,endpoint=True)
     dataset = pd.read_csv(sys.argv[1])
@@ -157,8 +168,8 @@ if __name__ == "__main__":
         test_result = np.asarray(temp)
         accuracy = accuracy_score(test_target, test_result)
         test_data_accuracies.append(accuracy)
-    
-    #Plotting the graph with corresponding labels and output formats
+
+    # Plotting the graph with corresponding labels and output formats
     line1, = plt.plot(max_depths, train_data_accuracies, 'b', label="Train AUC")
     line2, = plt.plot(max_depths, test_data_accuracies, 'r', label="Test AUC")
     plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
@@ -169,6 +180,14 @@ if __name__ == "__main__":
         plt.savefig('winequality-red-reduced.png', format='png')
     else:
         plt.savefig("winequality-white-reduced.png",format='png')
+
+    visualizeDifference(test_target, test_result)
+
+    print("Higest accuracy score in 15-step increasing depths is %f"%max(test_data_accuracies))
+   
+    print("Mean Absolute Error is: %1.2f"%mean_absolute_error(test_target, test_result))
+
+
 
 
 
