@@ -8,6 +8,7 @@ from sklearn import linear_model
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from sklearn.metrics import mean_absolute_error
+from textwrap import wrap
 
 WineScore = []
 weight = []
@@ -59,6 +60,30 @@ def regplot(data,__name__):
 	fig.savefig(__name__)
 	plt.close()
 
+def visualizeDifference(whiteScores, redScores,whitePreds, redPreds):
+
+	#visualize reds
+	fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
+	axs[0].hist(redScores)
+	axs[0].set_title('Red Actual Scores')
+	axs[1].hist(redPreds)
+	axs[1].set_title('Red Predicted Scores\nwith Linear Regression')
+	for ax in axs.flat:
+		ax.set(xlabel='Quality', ylabel='Frequency')
+	fig = plt.gcf()
+	fig.savefig('redComparisonLR.png')
+
+	#visualize whites
+	fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
+	axs[0].hist(whiteScores)
+	axs[0].set_title('White Actual Scores')
+	axs[1].hist(whitePreds)
+	axs[1].set_title('White Predicted Scores\nwith Linear Regression')
+	for ax in axs.flat:
+		ax.set(xlabel='Quality', ylabel='Frequency')
+	fig = plt.gcf()
+	fig.savefig('whiteComparisonLR.png')
+
 
 def main():
 	whites = (pd.read_csv('winequality-white-reduced.csv', delimiter = ",", usecols = [1,2,3,4]))
@@ -82,6 +107,8 @@ def main():
 	redsAccuracy =accuracy(redPreds,redScores)
 	whitesAccuracy = accuracy(whitePreds,whiteScores)
 
+	visualizeDifference(whiteScores, redScores, whitePreds, redPreds)
+
 	print("Mean Absolute Error")
 	print("Whites: %1.2f"%mean_absolute_error(whiteScores, whitePreds))
 	print("Reds: %1.2f"%mean_absolute_error(redScores, redPreds))
@@ -89,6 +116,8 @@ def main():
 	print("Accuracy:")
 	print("Whites: %2d%%"%(whitesAccuracy*100))
 	print("Reds: %2d%%"%(redsAccuracy*100))
+
+
 
 if __name__ == '__main__':
 	main()
