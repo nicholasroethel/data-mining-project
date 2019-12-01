@@ -1,5 +1,5 @@
 
-#Implemented based on Towards Data Science decision tree tutorial by Joachin Valente
+#Adopted and modified based on Towards Data Science decision tree tutorial by Joachin Valente
 #https://towardsdatascience.com/decision-tree-from-scratch-in-python-46e99dfea775
 
 import numpy as np
@@ -90,52 +90,87 @@ class DecisionTreeClassifier:
 
 
 if __name__ == "__main__":
+    
     import sys
     from sklearn.model_selection import train_test_split
+    from sklearn.metrics import accuracy_score
+    import matplotlib.pyplot as plt
+    from matplotlib.legend_handler import HandlerLine2D
 
+
+    #Consists total of 15 depths, from number range 1 to 30
+    max_depths = np.linspace(1,30,15,endpoint=True)
     dataset = pd.read_csv(sys.argv[1])
 
-    # = pd.read_csv('winequality-white-reduced.csv')
-    #dataset = pd.read_csv(sys.argv[1])
-
-    X = dataset.drop('quality', axis=1)
-    y = dataset.quality  # pylint: disable=no-member
-
+    X = dataset.drop('quality', axis=1) #All features
+    y = dataset.quality #Just target label(Quality)
+    
+    #80/20 random split on the dataset for training and testing
     X_train,X_test,y_train,y_test = train_test_split(X,y,test_size = 0.2)
 
+    #Training data trimming
     train_data = X_train.to_numpy()
     train_data = np.delete(train_data,0,1)
-
     train_target = y_train.to_numpy()
-    clf = DecisionTreeClassifier(max_depth=15)
-    clf.fit(train_data, train_target)    
-
-    test_data = X_test.to_numpy()
-    test_data = np.delete(test_data,0,1)
-    test_target = y_test.to_numpy()
-    test_result = []
-    for i in test_data:
-        test_result.append(clf.predict([i]))
-    temp = []
-    for sublist in  test_result:
-        for item in sublist:
-            temp.append(item)
-
-    test_result = np.asarray(temp)
-    from sklearn.metrics import accuracy_score
-    accuracy = accuracy_score(test_target, test_result)
-
-    max_depths = np.linspace(1,40,40,endpoint=True)
-    line1 = plt.plot(max_depths,test_target,'b',lable="test_target")
-    line2 = plt.plot(max_depths,test_result,'r',lable="test_result")
-    # plt.ylabel(‘AUC score’)
-    # plt.xlabel(‘Tree depth’)
-    plt.show()
 
     
-    print("\nTest data targets:\n")
-    print(test_target)
-    print("\nTest data results from predictions:\n")
-    print(test_result)
-    print("\nThe confidence score is: ")
-    print(accuracy)
+    #Obtain training data accuracies
+    train_data_accuracies = []
+    for max_depth in max_depths:
+
+        clf = DecisionTreeClassifier(max_depth=max_depth)
+        clf.fit(train_data, train_target) 
+
+        train_result = []       
+        for i in train_data:
+            train_result.append(clf.predict([i]))
+        
+        temp = []
+        for sublist in  train_result:
+            for item in sublist:
+                temp.append(item)
+
+        train_result = np.asarray(temp)
+        accuracy = accuracy_score(train_target, train_result)
+        train_data_accuracies.append(accuracy)
+
+    #Obtain testing data accuracies
+    test_data_accuracies = []
+    for max_depth in max_depths:
+
+        clf = DecisionTreeClassifier(max_depth=max_depth)
+        clf.fit(train_data, train_target) 
+
+        test_data = X_test.to_numpy()
+        test_data = np.delete(test_data,0,1)
+        test_target = y_test.to_numpy()
+        test_result = []
+        for i in test_data:
+            test_result.append(clf.predict([i]))
+        
+        temp = []
+        for sublist in  test_result:
+            for item in sublist:
+                temp.append(item)
+
+        test_result = np.asarray(temp)
+        accuracy = accuracy_score(test_target, test_result)
+        test_data_accuracies.append(accuracy)
+    
+    #Plotting the graph with corresponding labels and output formats
+    line1, = plt.plot(max_depths, train_data_accuracies, 'b', label="Train AUC")
+    line2, = plt.plot(max_depths, test_data_accuracies, 'r', label="Test AUC")
+    plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
+    plt.title(sys.argv[1])
+    plt.ylabel('Accuracy Score')
+    plt.xlabel('Tree Depth')
+    if sys.argv[1] == "winequality-red-reduced.csv":
+        plt.savefig('winequality-red-reduced.png', format='png')
+    else:
+        plt.savefig("winequality-white-reduced.png",format='png')
+
+
+
+
+
+   
