@@ -94,7 +94,20 @@ class DecisionTreeClassifier:
                 node = node.right
         return node.predicted_class
 
+def visualizeDifference(Scores,Preds):
 
+    #visualizing
+    fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
+    axs[0].hist(Scores)
+    axs[0].set_title('Actual Scores')
+    axs[1].hist(Preds)
+    axs[1].set_title('Predicted Scores\nwith Regression')
+    for ax in axs.flat:
+        ax.set(xlabel='Quality', ylabel='Frequency')
+    fig = plt.gcf()
+    fig.savefig('ComparisonRT.png')
+
+       
 if __name__ == "__main__":
     
     #Consists total of 15 depths, from number range 1 to 30
@@ -168,8 +181,13 @@ if __name__ == "__main__":
     else:
         plt.savefig("winequality-white-reduced.png",format='png')
 
-    print("Mean Absolute Error is: %1.2f"%mean_absolute_error(test_target, test_result))
+    visualizeDifference(test_target, test_result)
+
+    print("Higest accuracy score in 15-step increasing depths is %f"%max(test_data_accuracies))
    
+    print("Mean Absolute Error is: %1.2f"%mean_absolute_error(test_target, test_result))
+
+
 
 
 
